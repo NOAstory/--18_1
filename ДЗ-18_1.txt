@@ -31,143 +31,125 @@ class Program
         int heroMana = HeroMaxMana;
         int healsRemaining = MaxHeals;
         bool isFireballUsed = false;
-        bool isGameRunning = true;
 
         Console.WriteLine("=== БИТВА С БОССОМ ===");
-        Console.WriteLine("Умения героя:");
-        Console.WriteLine(AttackCommand + " - Обычная атака");
-        Console.WriteLine(FireballCommand + " - Огненный шар (тратит ману)");
-        Console.WriteLine(ExplosionCommand + " - Взрыв (только после огненного шара)");
-        Console.WriteLine(HealCommand + " - Лечение (восстанавливает здоровье и ману)");
-        Console.WriteLine();
 
-        while (isGameRunning)
+        while (heroHealth > 0 && bossHealth > 0)
         {
-           
-            if (heroHealth <= 0 && bossHealth <= 0)
-            {
-                Console.WriteLine("=== НИЧЬЯ! ===");
-                Console.WriteLine("Герой и Босс убили друг друга одновременно!");
-                break;
-            }
-            else if (bossHealth <= 0)
-            {
-                Console.WriteLine("=== ПОБЕДА! ===");
-                Console.WriteLine("Герой победил Босса! Мир спасен!");
-                break;
-            }
-            else if (heroHealth <= 0)
-            {
-                Console.WriteLine("=== ПОРАЖЕНИЕ! ===");
-                Console.WriteLine("Босс победил Героя... Мир погрузился во тьму.");
-                break;
-            }
-
             Console.WriteLine($"=== СТАТУС ===");
             Console.WriteLine($"Босс: Здоровье {bossHealth}/{BossMaxHealth}");
             Console.WriteLine($"Герой: Здоровье {heroHealth}/{HeroMaxHealth}, Мана {heroMana}/{HeroMaxMana}");
             Console.WriteLine($"Лечения осталось: {healsRemaining}");
-
-            Console.Write("Огненный шар использован: ");
-            Console.WriteLine(isFireballUsed ? "ДА" : "НЕТ");
+            Console.WriteLine($"Огненный шар использован: {(isFireballUsed ? "ДА" : "НЕТ")}");
             Console.WriteLine();
 
-            bool isPlayerActionSuccessful = false;
-            Console.Write("Выберите умение (1-4): ");
+            Console.WriteLine("=== ВЫБЕРИТЕ УМЕНИЕ ===");
+            Console.WriteLine($"{AttackCommand} -  Обычная атака");
+            Console.WriteLine($"{FireballCommand} -  Огненный шар (тратит ману)");
+            Console.WriteLine($"{ExplosionCommand} -  Взрыв (только после огненного шара)");
+            Console.WriteLine($"{HealCommand} -  Лечение (восстанавливает здоровье и ману)");
+            Console.WriteLine();
+
+            Console.Write("Ваш выбор: ");
             string input = Console.ReadLine();
+            Console.WriteLine();
 
-            if (input == AttackCommand)
+            bool isPlayerTurnSkipped = false;
+
+            switch (input)
             {
-                bossHealth -= HeroBaseAttack;
-                Console.WriteLine($" Герой наносит обычную атаку и наносит {HeroBaseAttack} урона!");
-                isFireballUsed = false;
-                isPlayerActionSuccessful = true;
-            }
-            else if (input == FireballCommand)
-            {
-                if (heroMana >= FireballCost)
-                {
-                    heroMana -= FireballCost;
-                    bossHealth -= FireballDamage;
-                    isFireballUsed = true;
-                    Console.WriteLine($" Герой бросает огненный шар и наносит {FireballDamage} урона!");
-                    Console.WriteLine($"Огненный шар активирован! Теперь доступен Взрыв.");
-                    isPlayerActionSuccessful = true;
-                }
-                else
-                {
-                    Console.WriteLine(" Недостаточно маны для огненного шара!");
-                }
-            }
-            else if (input == ExplosionCommand)
-            {
-                if (isFireballUsed)
-                {
-                    bossHealth -= ExplosionDamage;
+                case AttackCommand:
+                    bossHealth -= HeroBaseAttack;
+                    Console.WriteLine($" Герой наносит обычную атаку и наносит {HeroBaseAttack} урона!");
                     isFireballUsed = false;
-                    Console.WriteLine($" ГЕРОЙ ВЗРЫВАЕТ ВСЕ ВОКРУГ И НАНОСИТ {ExplosionDamage} урона!");
-                    isPlayerActionSuccessful = true;
-                }
-                else
-                {
-                    Console.WriteLine(" Взрыв можно использовать только после огненного шара!");
-                }
-            }
-            else if (input == HealCommand)
-            {
-                if (healsRemaining > 0)
-                {
-                    int oldHealth = heroHealth;
-                    int oldMana = heroMana;
+                    break;
 
-                    heroHealth = Math.Min(heroHealth + HealAmount, HeroMaxHealth);
-                    heroMana = Math.Min(heroMana + ManaRestoreAmount, HeroMaxMana);
-                    healsRemaining--;
+                case FireballCommand:
+                    if (heroMana >= FireballCost)
+                    {
+                        heroMana -= FireballCost;
+                        bossHealth -= FireballDamage;
+                        isFireballUsed = true;
+                        Console.WriteLine($" Герой бросает огненный шар и наносит {FireballDamage} урона!");
+                        Console.WriteLine($"Огненный шар активирован! Теперь доступен Взрыв.");
+                    }
+                    else
+                    {
+                        Console.WriteLine(" Недостаточно маны для огненного шара!");
+                        isPlayerTurnSkipped = true;
+                    }
+                    break;
 
-                    Console.WriteLine($" Герой использует лечение!");
-                    Console.WriteLine($"Восстановлено здоровья: {heroHealth - oldHealth}");
-                    Console.WriteLine($"Восстановлено маны: {heroMana - oldMana}");
-                    Console.WriteLine($"Осталось лечений: {healsRemaining}");
-                    isFireballUsed = false;
-                    isPlayerActionSuccessful = true;
-                }
-                else
-                {
-                    Console.WriteLine(" Закончились возможности лечения!");
-                }
-            }
-            else
-            {
-                Console.WriteLine(" Неизвестная команда! Герой пропускает ход.");
+                case ExplosionCommand:
+                    if (isFireballUsed)
+                    {
+                        bossHealth -= ExplosionDamage;
+                        isFireballUsed = false;
+                        Console.WriteLine($" ГЕРОЙ ВЗРЫВАЕТ ВСЕ ВОКРУГ И НАНОСИТ {ExplosionDamage} урона!");
+                    }
+                    else
+                    {
+                        Console.WriteLine(" Взрыв можно использовать только после огненного шара!");
+                        isPlayerTurnSkipped = true;
+                    }
+                    break;
+
+                case HealCommand:
+                    if (healsRemaining > 0)
+                    {
+                        int oldHealth = heroHealth;
+                        int oldMana = heroMana;
+
+                        heroHealth = Math.Min(heroHealth + HealAmount, HeroMaxHealth);
+                        heroMana = Math.Min(heroMana + ManaRestoreAmount, HeroMaxMana);
+                        healsRemaining--;
+
+                        Console.WriteLine($" Герой использует лечение!");
+                        Console.WriteLine($"Восстановлено здоровья: {heroHealth - oldHealth}");
+                        Console.WriteLine($"Восстановлено маны: {heroMana - oldMana}");
+                        Console.WriteLine($"Осталось лечений: {healsRemaining}");
+                        isFireballUsed = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine(" Закончились возможности лечения!");
+                        isPlayerTurnSkipped = true;
+                    }
+                    break;
+
+                default:
+                    Console.WriteLine(" Неизвестная команда! Герой пропускает ход.");
+                    isPlayerTurnSkipped = true;
+                    break;
             }
 
-            if (bossHealth <= 0)
-            {
-                Console.WriteLine("=== ПОБЕДА! ===");
-                Console.WriteLine("Герой победил Босса! Мир спасен!");
-                break;
-            }
-
-            if (isPlayerActionSuccessful)
+            if (bossHealth > 0 && !isPlayerTurnSkipped)
             {
                 int bossDamage = random.Next(BossMinAttack, BossMaxAttack + 1);
                 heroHealth -= bossDamage;
                 Console.WriteLine($" Босс атакует и наносит {bossDamage} урона!");
-                Console.WriteLine();
-
-                if (heroHealth <= 0 && bossHealth <= 0)
-                {
-                    Console.WriteLine("=== НИЧЬЯ! ===");
-                    Console.WriteLine("Герой и Босс убили друг друга одновременно!");
-                    break;
-                }
-                else if (heroHealth <= 0)
-                {
-                    Console.WriteLine("=== ПОРАЖЕНИЕ! ===");
-                    Console.WriteLine("Босс победил Героя... Мир погрузился во тьму.");
-                    break;
-                }
             }
+
+            Console.WriteLine();
+            Console.WriteLine("Нажмите любую клавишу для продолжения...");
+            Console.ReadKey();
+            Console.Clear();
+        }
+
+        if (heroHealth <= 0 && bossHealth <= 0)
+        {
+            Console.WriteLine("=== НИЧЬЯ! ===");
+            Console.WriteLine("Герой и Босс убили друг друга одновременно!");
+        }
+        else if (bossHealth <= 0)
+        {
+            Console.WriteLine("=== ПОБЕДА! ===");
+            Console.WriteLine("Герой победил Босса! Мир спасен!");
+        }
+        else if (heroHealth <= 0)
+        {
+            Console.WriteLine("=== ПОРАЖЕНИЕ! ===");
+            Console.WriteLine("Босс победил Героя... Мир погрузился во тьму.");
         }
     }
 }
